@@ -6,7 +6,7 @@
 #include <check.h>
 #include <string.h>
 
-#include "s21_string.h"
+#include "../s21_string.h"
 #define NMAX 1024
 #define AMOUNT 10
 #define BUFF_SIZE 1024
