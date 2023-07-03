@@ -5,109 +5,163 @@
 int s21_sscanf(const char *buffer, const char *frmt, ...) {
   const char *copy_buffer = buffer;
   format format[MAX_LENTH] = {0};
+  int return_value = -1;
   s21_size_t left_variable = 0;
-  s21_size_t err = parcer(format, frmt, &left_variable, buffer);
-  va_list argc;
-  s21_size_t sep = 0;
-  va_start(argc, frmt);
-  for (s21_size_t num = 0; num < err; ++num) {
-    switch (format[num].specifer) {
-      case 'c': {
-        s21_sscanf_char(&buffer, argc, format[num], &sep);
-        break;
+  if (s21_strlen(buffer) > 0 && s21_strlen(frmt) > 0) {
+    s21_size_t err = parcer(format, frmt, &left_variable);
+    va_list argc;
+    s21_size_t sep = 0;
+    va_start(argc, frmt);
+    for (s21_size_t num = 0; num < err; ++num) {
+      switch (format[num].specifer) {
+        case 'c': {
+          s21_sscanf_char(&buffer, argc, format[num], &sep);
+          while (*frmt++ != 'c')
+            ;
+          if (*frmt == ' ') sep = 1;
+          break;
+        }
+        case 's':
+          s21_sscanf_string(&buffer, argc, format[num], &sep);
+          while (*frmt++ != 's')
+            ;
+          sep = 1;
+          break;
+        case 'i': {
+          s21_sscanf_signed_integers(&buffer, argc, format[num]);
+          while (*frmt++ != 'i')
+            ;
+          sep = 1;
+          break;
+        }
+        case 'd': {
+          s21_sscanf_signed_integers(&buffer, argc, format[num]);
+          while (*frmt++ != 'd')
+            ;
+          sep = 1;
+          break;
+        }
+        case 'o': {
+          format[num].system = 8;
+          s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
+          while (*frmt++ != 'o')
+            ;
+          sep = 1;
+          break;
+        }
+        case 'x': {
+          format[num].system = 16;
+          s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
+          while (*frmt++ != 'x')
+            ;
+          sep = 1;
+          break;
+        }
+        case 'X': {
+          format[num].system = 16;
+          s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
+          while (*frmt++ != 'X')
+            ;
+          sep = 1;
+          break;
+        }
+        case 'n': {
+          s21_sscanf_symbols_before_n(buffer, copy_buffer, argc, frmt);
+          left_variable++;
+          while (*frmt++ != 'n')
+            ;
+          break;
+        }
+        case 'p': {
+          format[num].system = 16;
+          s21_sscanf_address(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'p')
+            ;
+          break;
+        }
+        case 'u': {
+          format[num].system = 10;
+          s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'u')
+            ;
+          break;
+        }
+        case 'f': {
+          s21_sscanf_double(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'f')
+            ;
+          break;
+        }
+        case 'e': {
+          s21_sscanf_double(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'e')
+            ;
+          break;
+        }
+        case 'E': {
+          s21_sscanf_double(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'E')
+            ;
+          break;
+        }
+        case 'g': {
+          s21_sscanf_double(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'g')
+            ;
+          break;
+        }
+        case 'G': {
+          s21_sscanf_double(&buffer, argc, format[num]);
+          sep = 1;
+          while (*frmt++ != 'G')
+            ;
+          break;
+        }
+        case '%': {
+          sep = 1;
+          percent(&buffer);
+          while (*frmt++ != '%')
+            ;
+          break;
+        }
+        default:
+          break;
       }
-      case 's':
-        s21_sscanf_string(&buffer, argc, format[num], &sep);
-        sep = 1;
-        break;
-      case 'i': {
-        s21_sscanf_signed_integers(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'd': {
-        s21_sscanf_signed_integers(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'o': {
-        format[num].system = 8;
-        s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'x': {
-        format[num].system = 16;
-        s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'X': {
-        format[num].system = 16;
-        s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'n': {
-        s21_sscanf_symbols_before_n(buffer, copy_buffer, argc);
-        left_variable++;
-        break;
-      }
-      case 'p': {
-        format[num].system = 16;
-        s21_sscanf_address(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'u': {
-        format[num].system = 10;
-        s21_sscanf_unsigned_integers(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'f': {
-        s21_sscanf_double(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'e': {
-        s21_sscanf_double(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'E': {
-        s21_sscanf_double(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'g': {
-        s21_sscanf_double(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      case 'G': {
-        s21_sscanf_double(&buffer, argc, format[num]);
-        sep = 1;
-        break;
-      }
-      default:
-        break;
     }
+    va_end(argc);
+    return_value = err - left_variable;
   }
-  va_end(argc);
-  return err - left_variable;
+  return return_value;
+}
+
+void percent(const char **buffer) {
+  if (**buffer == ' ') ++(*buffer);
+  // char *result = va_arg(argc, char *);
+  // *result = '%';
+  ++(*buffer);
+  // printf("%c\n",*result);
 }
 
 void s21_sscanf_string(const char **buffer, va_list argc, format format,
                        s21_size_t *separator) {
   wchar_t str[MAX_LENTH];
   wchar_t *px = str;
-  if (**buffer == ' ' && *separator == 1) ++(*buffer);
+  if ((**buffer == ' ' || **buffer == '\t' || **buffer == '\n') &&
+      *separator == 1)
+    ++(*buffer);
   while (**buffer == ' ') ++(*buffer);
   unsigned width = 0;
   unsigned valid_size = string_to_dec_int(format.with);
   if (valid_size == 0) valid_size = s21_strlen(*buffer);
-  while (**buffer != ' ' && **buffer != '\0' && width++ != valid_size) {
+  while (**buffer != ' ' &&
+         (**buffer != '\0' && **buffer != '\t' && **buffer != '\n') &&
+         width++ != valid_size) {
     *px++ = **buffer;
     ++(*buffer);
   }
@@ -161,14 +215,21 @@ void check_length_char(wchar_t c, format format, va_list argc) {
 }
 
 void s21_sscanf_symbols_before_n(const char *buffer, const char *copy_buffer,
-                                 va_list argc) {
+                                 va_list argc, const char *frmt) {
+  int n = 0;
+  for (s21_size_t i = 0; i < s21_strlen(frmt); i++) {
+    if (buffer[i] == frmt[i])
+      n++;
+    else
+      break;
+  }
   int *pointer = va_arg(argc, int *);
-  *pointer = buffer - copy_buffer;
+  *pointer = buffer - copy_buffer + n;
 }
 
 void read_string_number(const char **buffer, format format, char *px,
                         int *sign) {
-  while (**buffer == ' ') *buffer += 1;
+  while (**buffer == ' ' || **buffer == '\n') *buffer += 1;
   if (**buffer == '+') {
     (*buffer)++;
     *sign = 1;
@@ -176,12 +237,18 @@ void read_string_number(const char **buffer, format format, char *px,
     (*buffer)++;
     *sign = -1;
   }
+  int flag_exp = 0;
   unsigned width = 0;
-  unsigned valid_size = string_to_dec_int(format.with);
+  unsigned valid_size = string_to_dec_int(format.with) + (*sign == 1 ? 0 : -1);
   if (valid_size == 0) valid_size = s21_strlen(*buffer);
-  while (**buffer != ' ' && **buffer != '\0' && width++ != valid_size) {
+  while (**buffer != ' ' && **buffer != '\0' && **buffer != '%' &&
+         width++ != valid_size) {
     *px++ = **buffer;
     *buffer += 1;
+    if (**buffer == 'E' || **buffer == 'e')
+      flag_exp = 1;
+    else if ((**buffer == '+' || **buffer == '-') && flag_exp == 0)
+      break;
   }
   //(*buffer)++;
   *px = '\0';
@@ -262,54 +329,49 @@ void s21_sscanf_unsigned_integers(const char **buffer, va_list argc,
   char *px = str_numbers;
   int sign = 1;
   read_string_number(buffer, format, px, &sign);
-  unsigned long result = unsigned_with_system_int2dec(str_numbers, format);
+  unsigned long result =
+      unsigned_with_system_int2dec(str_numbers, format) * sign;
   if (format.point == 0) check_length_unsigned(result, format, argc);
 }
 
-s21_size_t parcer(format *format, const char *str, s21_size_t *left_variable,
-                  const char *str_from) {
+s21_size_t parcer(format *format, const char *str, s21_size_t *left_variable) {
   const char Specifiers[] = "cdieEfgGosuxXpn";
   const char Length[] = "hlL";
   s21_size_t i = -1;
+  int percent_repeat = 0;
   int j = 0;
-  int flag = 0;
-  int flag_spec = 0;
   while (*str) {
-    while (*str == *str_from) {
-      str++;
-      str_from++;
-    }
     if (*str == '%') {
-      i++;
+      percent_repeat++;
+      if (percent_repeat <= 1) i++;
       j = 0;
-      flag = 1;
-    } else if (s21_strchr(Specifiers, *str) && flag) {
-      flag = 0;
-      flag_spec = 1;
+      if (percent_repeat == 2) {
+        (*left_variable)++;
+        format[i].specifer = *str;
+        percent_repeat = 0;
+      }
+    } else if (s21_strchr(Specifiers, *str)) {
       format[i].specifer = *str;
-    } else if (s21_strchr(Length, *str) && flag) {
+      percent_repeat = 0;
+    } else if (s21_strchr(Length, *str)) {
       format[i].length = *str;
-    } else if (*str - '0' >= 0 && *str - '0' <= 9 && flag) {
+    } else if (*str - '0' >= 0 && *str - '0' <= 9) {
       format[i].with[j] = *str;
       j++;
       format[i].with[j] = '\0';
-    } else if (*str == '*' && flag) {
+    } else if (*str == '*') {
       format[i].point = 1;
       (*left_variable)++;
     }
     ++str;
-    if (flag_spec) {
-      while (*str_from != *str) str_from++;
-      flag_spec = 0;
-    }
   }
   return i + 1;
 }
 
 unsigned int check_calculus_system(const char *str) {
   unsigned system = 0;
-  if (s21_strlen(str) > 2 && str[0] == '0' && str[1] == 'x' &&
-      is_valid_hex_string(str))
+  if (s21_strlen(str) > 2 && str[0] == '0' &&
+      (str[1] == 'x' || str[1] == 'X') && is_valid_hex_string(str))
     system = 16;
   else if (s21_strlen(str) > 1 && str[0] == '0' && is_valid_oct_string(str)) {
     system = 8;
@@ -339,7 +401,7 @@ unsigned int is_valid(const char *str, unsigned int system) {
 int is_valid_hex(const char hex) {
   int bool_ = 1;
   if (!((hex >= '0' && hex <= '9') || (hex >= 'a' && hex <= 'f') ||
-        (hex >= 'A' && hex <= 'f') || hex == 'x'))
+        (hex >= 'A' && hex <= 'F') || hex == 'x' || hex == 'X'))
     bool_ = 0;
   return bool_;
 }
@@ -355,7 +417,7 @@ unsigned is_valid_hex_string(const char *hex) {
   for (s21_size_t i = 0; i < s21_strlen(hex); ++i)
     if (!((hex[i] >= '0' && hex[i] <= '9') ||
           (hex[i] >= 'a' && hex[i] <= 'f') ||
-          (hex[i] >= 'A' && hex[i] <= 'F') || hex[i] == 'x'))
+          (hex[i] >= 'A' && hex[i] <= 'Z') || hex[i] == 'x'))
       bool_ = 0;
   return bool_;
 }
@@ -370,7 +432,7 @@ unsigned is_valid_dec_string(const char *hex) {
 unsigned is_valid_oct_string(const char *oct) {
   unsigned bool_ = 1;
   for (s21_size_t i = 0; i < s21_strlen(oct); ++i)
-    if (!((oct[i] >= '0' && oct[i] <= '7'))) bool_ = 0;
+    if (!((oct[i] >= '0' && oct[i] <= '9'))) bool_ = 0;
   return bool_;
 }
 
@@ -462,11 +524,12 @@ long double scientific_to_double(char *str) {
 }
 
 long int signed_int2dec(const char *hex) {
-  long int dec = 0;
+  long long int dec = 0;
   unsigned int system = check_calculus_system(hex);
   unsigned delta = 0;
   if (system == 8 || system == 16) {
-    if (system == 16 && s21_strcspn(hex, "0x") == 0)
+    if (system == 16 &&
+        (s21_strcspn(hex, "0x") == 0 || s21_strcspn(hex, "0X") == 0))
       delta = 2;
     else if (system == 8 && hex[0] == '0')
       delta = 1;
@@ -478,7 +541,7 @@ long int signed_int2dec(const char *hex) {
   } else if (system == 10) {
     for (s21_size_t j = 0, i = s21_strlen(hex) - 1; j < s21_strlen(hex);
          ++j, --i) {
-      dec += char2int(hex[j]) * pow(system, i);
+      dec += char2int(hex[j]) * powl(system, i);
     }
   } else
     dec = 1;

@@ -27,13 +27,17 @@ void *s21_memchr(const void *str, int c, size_t n) {
 }
 
 int s21_memcmp(const void *str1, const void *str2, size_t n) {
-  const char *s1 = str1;
-  const char *s2 = str2;
-
-  for (s21_size_t i = 0; i < n; ++i) {
-    if (s1[i] != s2[i]) return (s1[i] < s2[i]) ? -1 : 1;
+  const unsigned char *memcmpStr1 = (const unsigned char *)str1;
+  const unsigned char *memcmpStr2 = (const unsigned char *)str2;
+  int flag = 0;
+  s21_size_t i = 0;
+  while (i < n && flag == 0) {
+    if (memcmpStr1[i] != memcmpStr2[i]) {
+      flag = memcmpStr1[i] - memcmpStr2[i];
+    }
+    i++;
   }
-  return 0;
+  return flag;
 }
 
 void *s21_memcpy(void *dest, const void *src, size_t n) {
@@ -118,9 +122,20 @@ int s21_strcmp(const char *str1, const char *str2) {
 }
 
 int s21_strncmp(const char *str1, const char *str2, size_t n) {
-  for (s21_size_t i = 0; i < n && (str1[i] != '\0' || str2[i] != '\0'); ++i) {
-    if (str1[i] != str2[i]) return (str1[i] < str2[i]) ? -1 : 1;
+  int size = 0;
+  unsigned int i = 0;
+  int flag = 0;
+  while (flag == 0 && i < n) {
+    if (str1[i] != str2[i]) {
+      size = str1[i] - str2[i];
+      flag = 1;
+    }
+    if (str1[i] == '\0' && str2[i] == '\0') {
+      flag = 1;
+    }
+    i++;
   }
+  return size;
   return 0;
 }
 

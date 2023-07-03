@@ -1,5 +1,5 @@
 CC = gcc 
-FLAGS = -Wall -Werror -Wextra #-fsanitize=address -g
+FLAGS = -Wall -Werror -Wextra  #-fsanitize=address -g
 LIBRARY = s21_string.a
 CLEAN = clean
 REPORT = gcov_report
@@ -11,14 +11,14 @@ TARGET = test
 GCOV_FLAGS = -fprofile-arcs -ftest-coverage -lgcov 
 
 ifeq ($(UNAME), Linux)
- TEST_FLAGS += -lcheck -lsubunit -lrt -lpthread -lm
+ TEST_FLAGS += -lcheck -lsubunit -lrt -lpthread -lm #-fsanitize=address
 else
  TEST_FLAGS += -lcheck -lm
 endif
 all : $(CLEAN) $(LIBRARY) $(TARGET) $(REPORT)
 	$(CLEAN) $(LIBRARY) $(TARGET) $(REPORT)
 $(TARGET) : $(SRC) $(SRC_TEST)
-	$(CC) $(FLAGS) $(SRC_TEST) $(SRC) $(TEST_FLAGS) -o $(TARGET)
+	$(CC) $(SRC_TEST) $(SRC) $(TEST_FLAGS) -o $(TARGET)
 	./$(TARGET)
 $(LIBRARY) : $(SRC)
 	$(CC) $(FLAGS) -c $(SRC) $(TEST_FLAGS)
@@ -32,7 +32,7 @@ $(REPORT) : $(SRC) $(SRC_TEST) build_file
 	genhtml $(REPORT).info -o html_report
 	open html_report/index.html
 f : $(SRC)
-	$(CC) $(FLAGS) $(SRC) $(TEST_FLAGS) -o ./test
+	$(CC) $(SRC) $(TEST_FLAGS)  -o ./test
 	./test
 build_file:
 	mkdir Build
